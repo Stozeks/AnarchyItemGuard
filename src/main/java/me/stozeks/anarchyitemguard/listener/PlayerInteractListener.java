@@ -1,8 +1,7 @@
 package me.stozeks.anarchyitemguard.listener;
 
 import me.stozeks.anarchyitemguard.core.AnarchyItemGuardPlugin;
-import me.stozeks.anarchyitemguard.manager.ItemManager;
-import me.stozeks.anarchyitemguard.region.RegionManager;
+import me.stozeks.anarchyitemguard.service.ProtectionService;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -16,17 +15,14 @@ import org.bukkit.inventory.ItemStack;
 public class PlayerInteractListener implements Listener {
 
     private final AnarchyItemGuardPlugin plugin;
-    private final ItemManager itemManager;
-    private final RegionManager regionManager;
+    private final ProtectionService protectionService;
 
     public PlayerInteractListener(
             AnarchyItemGuardPlugin plugin,
-            ItemManager itemManager,
-            RegionManager regionManager
+            ProtectionService protectionService
     ) {
         this.plugin = plugin;
-        this.itemManager = itemManager;
-        this.regionManager = regionManager;
+        this.protectionService = protectionService;
     }
 
     @EventHandler
@@ -43,21 +39,16 @@ public class PlayerInteractListener implements Listener {
         }
 
         ItemStack item = event.getItem();
+        Location interactionLocation = getInteractionLocation(event);
 
-        if (item == null || !itemManager.isBlocked(item)) {
-            return;
-        }
-
-        Location interactionLocation =
-                getInteractionLocation(event);
-
-        boolean insideForeignRegion =
-                regionManager.isInsideForeignRegion(
+        boolean shouldBlock =
+                protectionService.shouldBlockItemUse(
                         event.getPlayer(),
+                        item,
                         interactionLocation
                 );
 
-        if (!insideForeignRegion) {
+        if (!shouldBlock) {
             return;
         }
 
