@@ -1,0 +1,10 @@
+name: AnarchyItemGuard
+version: '${ptoject.version}'
+main: me.stozeks.anarchyitemguard.AnarchyItemGuardPlugin
+api-version: '1.16.5'
+author:
+  -  Stozeks
+description: Prevents unauthorized use of configurable items inside WorldGuard regions.
+
+depend:
+  -  WorldGuard
