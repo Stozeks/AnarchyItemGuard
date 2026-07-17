@@ -7,3 +7,14 @@ description: Prevents unauthorized use of configurable items inside WorldGuard r
 
 depend:
   - WorldGuard
+
+commands:
+  aig:
+    description: Main AnarchyItemGuard command.
+    usage: /aig reload
+    permission: anarchyitemguard.reload
+
+permissions:
+  anarchyitemguard.reload:
+    description: Allows reloading the AnarchyItemGuard configuration.
+    default: op
