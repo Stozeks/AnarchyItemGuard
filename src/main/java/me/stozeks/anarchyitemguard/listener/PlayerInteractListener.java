@@ -4,7 +4,6 @@ import me.stozeks.anarchyitemguard.AnarchyItemGuardPlugin;
 import me.stozeks.anarchyitemguard.manager.ItemManager;
 import me.stozeks.anarchyitemguard.region.RegionManager;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -42,9 +41,7 @@ public class PlayerInteractListener implements Listener {
             return;
         }
 
-        Material material = item.getType();
-
-        if (!itemManager.isBlocked(material)) {
+        if (!itemManager.isBlocked(item)) {
             return;
         }
 

@@ -1,6 +1,17 @@
 blocked-items:
-  - ENDER_PEARL
-  - CHORUS_FRUIT
+  trapka:
+    material: ENDER_PEARL
+    display-name: "&cТрапка"
+    lore:
+      - "&7Запрещено использовать"
+      - "&7в чужих регионах."
+
+  plast:
+    material: CHORUS_FRUIT
+    display-name: "&5Пласт"
+    lore:
+      - "&7Запрещено использовать"
+      - "&7в чужих регионах."
 
 messages:
   blocked-in-region: "&cВы не можете использовать этот предмет в чужом регионе."
