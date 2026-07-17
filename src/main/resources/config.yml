@@ -5,6 +5,8 @@ blocked-items:
     lore:
       - "&7Запрещено использовать"
       - "&7в чужих регионах."
+    pdc-key: "customitems:item_id"
+    pdc-value: "trapka"
 
   plast:
     material: CHORUS_FRUIT
@@ -12,6 +14,8 @@ blocked-items:
     lore:
       - "&7Запрещено использовать"
       - "&7в чужих регионах."
+    pdc-key: "customitems:item_id"
+    pdc-value: "plast"
 
 messages:
   blocked-in-region: "&cВы не можете использовать этот предмет в чужом регионе."

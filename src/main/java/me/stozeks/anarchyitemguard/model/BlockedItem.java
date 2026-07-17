@@ -2,8 +2,11 @@ package me.stozeks.anarchyitemguard.model;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,17 +18,23 @@ public class BlockedItem {
     private final Material material;
     private final String displayName;
     private final List<String> lore;
+    private final NamespacedKey persistentDataKey;
+    private final String persistentDataValue;
 
     public BlockedItem(
             String id,
             Material material,
             String displayName,
-            List<String> lore
+            List<String> lore,
+            NamespacedKey persistentDataKey,
+            String persistentDataValue
     ) {
         this.id = id;
         this.material = material;
         this.displayName = translateColors(displayName);
         this.lore = translateColors(lore);
+        this.persistentDataKey = persistentDataKey;
+        this.persistentDataValue = persistentDataValue;
     }
 
     public boolean matches(ItemStack itemStack) {
@@ -43,7 +52,14 @@ public class BlockedItem {
         boolean requiresLore =
                 lore != null && !lore.isEmpty();
 
-        if (!requiresDisplayName && !requiresLore) {
+        boolean requiresPersistentData =
+                persistentDataKey != null
+                        && persistentDataValue != null
+                        && !persistentDataValue.isEmpty();
+
+        if (!requiresDisplayName
+                && !requiresLore
+                && !requiresPersistentData) {
             return true;
         }
 
@@ -79,6 +95,20 @@ public class BlockedItem {
             }
         }
 
+        if (requiresPersistentData) {
+            PersistentDataContainer dataContainer =
+                    itemMeta.getPersistentDataContainer();
+
+            String storedValue = dataContainer.get(
+                    persistentDataKey,
+                    PersistentDataType.STRING
+            );
+
+            if (!persistentDataValue.equals(storedValue)) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -96,6 +126,14 @@ public class BlockedItem {
 
     public List<String> getLore() {
         return lore;
+    }
+
+    public NamespacedKey getPersistentDataKey() {
+        return persistentDataKey;
+    }
+
+    public String getPersistentDataValue() {
+        return persistentDataValue;
     }
 
     private String translateColors(String text) {
