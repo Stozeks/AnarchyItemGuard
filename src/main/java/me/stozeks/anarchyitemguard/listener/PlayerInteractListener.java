@@ -2,6 +2,7 @@ package me.stozeks.anarchyitemguard.listener;
 
 import me.stozeks.anarchyitemguard.AnarchyItemGuardPlugin;
 import me.stozeks.anarchyitemguard.manager.ItemManager;
+import me.stozeks.anarchyitemguard.region.RegionManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -14,13 +15,16 @@ public class PlayerInteractListener implements Listener {
 
     private final AnarchyItemGuardPlugin plugin;
     private final ItemManager itemManager;
+    private final RegionManager regionManager;
 
     public PlayerInteractListener(
             AnarchyItemGuardPlugin plugin,
-            ItemManager itemManager
+            ItemManager itemManager,
+            RegionManager regionManager
     ) {
         this.plugin = plugin;
         this.itemManager = itemManager;
+        this.regionManager = regionManager;
     }
 
     @EventHandler
@@ -44,11 +48,21 @@ public class PlayerInteractListener implements Listener {
             return;
         }
 
+        boolean insideForeignRegion =
+                regionManager.isInsideForeignRegion(
+                        event.getPlayer(),
+                        event.getPlayer().getLocation()
+                );
+
+        if (!insideForeignRegion) {
+            return;
+        }
+
         event.setCancelled(true);
 
         String message = plugin.getConfig().getString(
-                "messages.blocked-item",
-                "&cЭтот предмет запрещено использовать."
+                "messages.blocked-in-region",
+                "&cВы не можете использовать этот предмет в чужом регионе."
         );
 
         event.getPlayer().sendMessage(

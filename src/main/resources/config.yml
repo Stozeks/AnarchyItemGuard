@@ -1,2 +1,6 @@
+blocked-items:
+  - ENDER_PEARL
+  - CHORUS_FRUIT
+
 messages:
-  blocked-item: "&cЭтот предмет запрещено использовать."
+  blocked-in-region: "&cВы не можете использовать этот предмет в чужом регионе."

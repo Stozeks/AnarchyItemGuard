@@ -12,6 +12,7 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <name>AnarchyItemGuard</name>
+
     <description>
         Prevents unauthorized use of configurable items inside WorldGuard regions.
     </description>

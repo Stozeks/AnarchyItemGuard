@@ -4,6 +4,7 @@ import me.stozeks.anarchyitemguard.AnarchyItemGuardPlugin;
 import org.bukkit.Material;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 public class ItemManager {
@@ -19,21 +20,33 @@ public class ItemManager {
     private void loadBlockedItems() {
         blockedItems.clear();
 
-        for (String materialName : plugin.getConfig().getStringList("blocked-items")) {
-            Material material = Material.matchMaterial(materialName);
+        List<String> configuredItems =
+                plugin.getConfig().getStringList("blocked-items");
 
-            if (material != null) {
-                blockedItems.add(material);
-            } else {
+        for (String itemName : configuredItems) {
+            Material material = Material.matchMaterial(itemName);
+
+            if (material == null) {
                 plugin.getLogger().warning(
-                        "Unknown material in config.yml: " + materialName
+                        "Неизвестный материал в config.yml: " + itemName
                 );
+
+                continue;
             }
+
+            blockedItems.add(material);
         }
+
+        plugin.getLogger().info(
+                "Загружено запрещённых предметов: " + blockedItems.size()
+        );
     }
 
     public boolean isBlocked(Material material) {
         return blockedItems.contains(material);
     }
-}
 
+    public void reload() {
+        loadBlockedItems();
+    }
+}
