@@ -18,7 +18,8 @@ blocked-items:
     pdc-value: "plast"
 
 messages:
-  blocked-in-region: "&cВы не можете использовать этот предмет в чужом регионе."
-  reload-success: "&aКонфигурация AnarchyItemGuard успешно перезагружена."
-  no-permission: "&cУ вас нет права использовать эту команду."
-  usage: "&eИспользование: /aig reload"
+  blocked-in-region: "&cYou cannot use this item inside another player's region."
+  reload-success: "&aAnarchyItemGuard configuration reloaded successfully."
+  reload-failed: "&cThe configuration could not be reloaded. Check the server console."
+  no-permission: "&cYou do not have permission to use this command."
+  usage: "&eUsage: /aig reload"

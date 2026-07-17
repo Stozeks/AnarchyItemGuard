@@ -1,6 +1,6 @@
 package me.stozeks.anarchyitemguard.manager;
 
-import me.stozeks.anarchyitemguard.AnarchyItemGuardPlugin;
+import me.stozeks.anarchyitemguard.core.AnarchyItemGuardPlugin;
 import me.stozeks.anarchyitemguard.model.BlockedItem;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -19,68 +19,105 @@ public class ItemManager {
 
     public ItemManager(AnarchyItemGuardPlugin plugin) {
         this.plugin = plugin;
-        loadBlockedItems();
+        reload();
     }
 
-    private void loadBlockedItems() {
-        blockedItems.clear();
-
+    public boolean reload() {
         ConfigurationSection blockedItemsSection =
                 plugin.getConfig().getConfigurationSection("blocked-items");
 
         if (blockedItemsSection == null) {
-            plugin.getLogger().warning(
-                    "Секция blocked-items отсутствует в config.yml."
+            plugin.getLogger().severe(
+                    "The blocked-items section is missing from config.yml."
             );
 
-            return;
+            return false;
         }
+
+        List<BlockedItem> loadedItems = new ArrayList<>();
 
         for (String itemId : blockedItemsSection.getKeys(false)) {
-            ConfigurationSection itemSection =
-                    blockedItemsSection.getConfigurationSection(itemId);
+            BlockedItem blockedItem =
+                    loadBlockedItem(itemId, blockedItemsSection);
 
-            if (itemSection == null) {
-                plugin.getLogger().warning(
-                        "Не удалось загрузить настройку предмета: " + itemId
-                );
-
-                continue;
+            if (blockedItem != null) {
+                loadedItems.add(blockedItem);
             }
-
-            Material material = loadMaterial(itemId, itemSection);
-
-            if (material == null) {
-                continue;
-            }
-
-            String displayName =
-                    itemSection.getString("display-name");
-
-            List<String> lore =
-                    itemSection.getStringList("lore");
-
-            NamespacedKey persistentDataKey =
-                    loadPersistentDataKey(itemId, itemSection);
-
-            String persistentDataValue =
-                    itemSection.getString("pdc-value");
-
-            BlockedItem blockedItem = new BlockedItem(
-                    itemId,
-                    material,
-                    displayName,
-                    lore,
-                    persistentDataKey,
-                    persistentDataValue
-            );
-
-            blockedItems.add(blockedItem);
         }
 
+        blockedItems.clear();
+        blockedItems.addAll(loadedItems);
+
         plugin.getLogger().info(
-                "Загружено запрещённых предметов: "
-                        + blockedItems.size()
+                "Loaded " + blockedItems.size() + " blocked item(s)."
+        );
+
+        return true;
+    }
+
+    private BlockedItem loadBlockedItem(
+            String itemId,
+            ConfigurationSection blockedItemsSection
+    ) {
+        ConfigurationSection itemSection =
+                blockedItemsSection.getConfigurationSection(itemId);
+
+        if (itemSection == null) {
+            plugin.getLogger().warning(
+                    "Could not read blocked item section: " + itemId
+            );
+
+            return null;
+        }
+
+        Material material = loadMaterial(itemId, itemSection);
+
+        if (material == null) {
+            return null;
+        }
+
+        String displayName =
+                itemSection.getString("display-name");
+
+        List<String> lore =
+                itemSection.getStringList("lore");
+
+        String configuredPdcKey =
+                itemSection.getString("pdc-key");
+
+        String persistentDataValue =
+                itemSection.getString("pdc-value");
+
+        boolean hasPdcKey = isConfigured(configuredPdcKey);
+        boolean hasPdcValue = isConfigured(persistentDataValue);
+
+        if (hasPdcKey != hasPdcValue) {
+            plugin.getLogger().warning(
+                    "Blocked item '" + itemId
+                            + "' must define both pdc-key and pdc-value."
+            );
+
+            return null;
+        }
+
+        NamespacedKey persistentDataKey = null;
+
+        if (hasPdcKey) {
+            persistentDataKey =
+                    loadPersistentDataKey(itemId, configuredPdcKey);
+
+            if (persistentDataKey == null) {
+                return null;
+            }
+        }
+
+        return new BlockedItem(
+                itemId,
+                material,
+                displayName,
+                lore,
+                persistentDataKey,
+                persistentDataValue
         );
     }
 
@@ -91,22 +128,25 @@ public class ItemManager {
         String materialName =
                 itemSection.getString("material");
 
-        if (materialName == null || materialName.trim().isEmpty()) {
+        if (!isConfigured(materialName)) {
             plugin.getLogger().warning(
-                    "У предмета " + itemId + " не указан material."
+                    "Blocked item '" + itemId
+                            + "' does not define a material."
             );
 
             return null;
         }
 
         Material material =
-                Material.matchMaterial(materialName);
+                Material.matchMaterial(
+                        materialName.trim().toUpperCase(Locale.ROOT)
+                );
 
         if (material == null) {
             plugin.getLogger().warning(
-                    "Неизвестный material у предмета "
+                    "Unknown material for blocked item '"
                             + itemId
-                            + ": "
+                            + "': "
                             + materialName
             );
         }
@@ -116,29 +156,22 @@ public class ItemManager {
 
     private NamespacedKey loadPersistentDataKey(
             String itemId,
-            ConfigurationSection itemSection
+            String configuredKey
     ) {
-        String configuredKey =
-                itemSection.getString("pdc-key");
+        String normalizedKey =
+                configuredKey.trim().toLowerCase(Locale.ROOT);
 
-        if (configuredKey == null || configuredKey.trim().isEmpty()) {
-            return null;
-        }
-
-        String[] keyParts = configuredKey
-                .trim()
-                .toLowerCase(Locale.ROOT)
-                .split(":", 2);
+        String[] keyParts = normalizedKey.split(":", 2);
 
         if (keyParts.length != 2
                 || keyParts[0].isEmpty()
                 || keyParts[1].isEmpty()) {
             plugin.getLogger().warning(
-                    "Некорректный pdc-key у предмета "
+                    "Invalid pdc-key for blocked item '"
                             + itemId
-                            + ": "
+                            + "': "
                             + configuredKey
-                            + ". Используйте формат namespace:key."
+                            + ". Expected namespace:key."
             );
 
             return null;
@@ -148,14 +181,18 @@ public class ItemManager {
             return new NamespacedKey(keyParts[0], keyParts[1]);
         } catch (IllegalArgumentException exception) {
             plugin.getLogger().warning(
-                    "Недопустимый pdc-key у предмета "
+                    "Unsupported pdc-key for blocked item '"
                             + itemId
-                            + ": "
+                            + "': "
                             + configuredKey
             );
 
             return null;
         }
+    }
+
+    private boolean isConfigured(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 
     public boolean isBlocked(ItemStack itemStack) {
@@ -169,10 +206,8 @@ public class ItemManager {
     }
 
     public List<BlockedItem> getBlockedItems() {
-        return Collections.unmodifiableList(blockedItems);
-    }
-
-    public void reload() {
-        loadBlockedItems();
+        return Collections.unmodifiableList(
+                new ArrayList<>(blockedItems)
+        );
     }
 }

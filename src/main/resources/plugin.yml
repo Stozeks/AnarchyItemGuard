@@ -1,6 +1,6 @@
 name: AnarchyItemGuard
 version: 1.0.0
-main: me.stozeks.anarchyitemguard.AnarchyItemGuardPlugin
+main: me.stozeks.anarchyitemguard.core.AnarchyItemGuardPlugin
 api-version: 1.16
 author: Stozeks
 description: Prevents unauthorized use of configurable items inside WorldGuard regions.
@@ -12,7 +12,6 @@ commands:
   aig:
     description: Main AnarchyItemGuard command.
     usage: /aig reload
-    permission: anarchyitemguard.reload
 
 permissions:
   anarchyitemguard.reload:

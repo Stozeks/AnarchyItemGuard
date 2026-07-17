@@ -1,4 +1,4 @@
-package me.stozeks.anarchyitemguard;
+package me.stozeks.anarchyitemguard.core;
 
 import me.stozeks.anarchyitemguard.command.AigCommand;
 import me.stozeks.anarchyitemguard.listener.PlayerInteractListener;
