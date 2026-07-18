@@ -23,9 +23,11 @@ public final class AnarchyItemGuardPlugin extends JavaPlugin {
         itemManager = new ItemManager(this);
         regionManager = new RegionManager();
         debugLogger = new DebugLogger(this);
+
         protectionService = new ProtectionService(
                 itemManager,
-                regionManager
+                regionManager,
+                debugLogger
         );
 
         registerListeners();
