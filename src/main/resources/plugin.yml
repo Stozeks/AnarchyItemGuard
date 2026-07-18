@@ -3,17 +3,21 @@ version: 1.0.0
 main: me.stozeks.anarchyitemguard.core.AnarchyItemGuardPlugin
 api-version: 1.16
 author: Stozeks
-description: Prevents unauthorized use of configurable items inside WorldGuard regions.
+description:  Prevents unauthorized use of configurable items inside WorldGuard regions.
 
 depend:
   - WorldGuard
 
 commands:
   aig:
-    description: Main AnarchyItemGuard command.
+    description:  Main AnarchyItemGuard command.
     usage: /aig reload
 
 permissions:
   anarchyitemguard.reload:
-    description: Allows reloading the AnarchyItemGuard configuration.
-    default: op
+    description:  Allows reloading the plugin configuration
+    default:  op
+
+  anarchyitemguard.bypass:
+    description:  Allows using blocked items inside foreign regions
+    default:  op

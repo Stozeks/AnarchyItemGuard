@@ -8,6 +8,9 @@ import org.bukkit.inventory.ItemStack;
 
 public class ProtectionService {
 
+    private static final String BYPASS_PERMISSION =
+            "anarchyitemguard.bypass";
+
     private final ItemManager itemManager;
     private final RegionManager regionManager;
 
@@ -24,7 +27,13 @@ public class ProtectionService {
             ItemStack item,
             Location interactionLocation
     ) {
-        if (player == null || item == null || interactionLocation == null) {
+        if (player == null
+                || item == null
+                || interactionLocation == null) {
+            return false;
+        }
+
+        if (player.hasPermission(BYPASS_PERMISSION)) {
             return false;
         }
 
